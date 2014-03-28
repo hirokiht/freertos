@@ -1,12 +1,5 @@
 #include "host.h"
 
-typedef union param_t{
-	int pdInt;
-	void *pdPtr;
-	char *pdChrPtr;
-} param;
-
-
 /*action will be in r0, and argv in r1*/
 int host_call(enum HOST_SYSCALL action, void *argv)
 {

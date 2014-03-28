@@ -31,6 +31,28 @@ enum HOST_SYSCALL{
 	SYS_TICKFREQ
 };
 
+enum SYS_OPEN_MODE{
+	SYS_OPEN_R = 0,
+	SYS_OPEN_RB,
+	SYS_OPEN_RU,
+	SYS_OPEN_RUB,
+	SYS_OPEN_W,
+	SYS_OPEN_WB,
+	SYS_OPEN_WU,
+	SYS_OPEN_WUB,
+	SYS_OPEN_A,
+	SYS_OPEN_AB,
+	SYS_OPEN_AU,
+	SYS_OPEN_AUB
+};
+
+typedef union param_t{
+	int pdInt;
+	void *pdPtr;
+	char *pdChrPtr;
+} param;
+
+
 int host_call(enum HOST_SYSCALL, void *argv) __attribute__((naked));
 
 int host_system(char *cmd);

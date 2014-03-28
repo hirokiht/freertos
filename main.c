@@ -108,25 +108,19 @@ void command_prompt(void *pvParameters)
 
 void sysinfo(void * pvParameters){
 	portTickType xLastWakeTime= xTaskGetTickCount();// Initialise the xLastWakeTime variable with the current time.
-	const portTickType xFrequency = 100;
-	signed char buf[500];
-	char buf2[512] = "echo ";
-	size_t i, ii = 0;
-    for( ;; vTaskDelayUntil( &xLastWakeTime, xFrequency ) ){
+	const portTickType xFrequency = 1000;
+	signed char buf[1024] = {'\0'};
+	
+	int fd = host_call(SYS_OPEN, (param []){{.pdChrPtr="sysinfo"}, {.pdInt=SYS_OPEN_A}, {.pdInt=7}});
+	if(!fd || fd == -1){
+		fio_printf(2, "\r\nOpen sysinfo file failure!\r\n");
+		return;	//open file failure
+	}
+    for( ; ; vTaskDelayUntil( &xLastWakeTime, xFrequency ) ){
 		vTaskList(buf);
-		for(i = 5, ii = 0 ; i < 512 && ii < 500 && buf[ii] != '\0'; i++)
-			if(buf[ii] == '\r' || buf[ii] == '\n'){
-				buf2[i++] = buf2[i++] = '\\';
-				buf2[i] = 'n';
-				ii += 2;
-			}else if(buf[ii] == '\t'){
-				buf2[i++] = buf2[i++] = '\\';
-				buf2[i] = 't';
-				ii++;
-			}else buf2[i] = buf[ii++];
-		strcpy(buf2+i," >> sysinfo");
-		int return_code	= host_system(buf2);
+		host_call(SYS_WRITE, (param []){{.pdInt=fd},{.pdChrPtr=(char *)buf}, {.pdInt=strlen((char *)buf)}});
      }
+     host_call(SYS_CLOSE, (param []){{.pdInt=fd}});
 }
 
 int main()
