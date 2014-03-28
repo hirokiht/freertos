@@ -15,6 +15,7 @@
 
 #include "clib.h"
 #include "shell.h"
+#include "host.h"
 
 /* _sromfs symbol can be found in main.ld linker script
  * it contains file system structure of test_romfs directory
@@ -105,6 +106,29 @@ void command_prompt(void *pvParameters)
 
 }
 
+void sysinfo(void * pvParameters){
+	portTickType xLastWakeTime= xTaskGetTickCount();// Initialise the xLastWakeTime variable with the current time.
+	const portTickType xFrequency = 100;
+    for( ;; vTaskDelayUntil( &xLastWakeTime, xFrequency ) ){
+		signed char buf[500];
+		char buf2[512] = "echo ";
+		size_t i, ii = 0;
+		vTaskList(buf);
+		for(i = 5 ; i < 512 && ii < 500; i++)
+			if(buf[ii] == '\r' || buf[ii] == '\n'){
+				buf2[i++] = buf2[i++] = '\\';
+				buf2[i] = 'n';
+				ii += 2;
+			}else if(buf[ii] == '\t'){
+				buf2[i++] = buf2[i++] = '\\';
+				buf2[i] = 't';
+				ii++;
+			}else buf2[i] = buf[ii++];
+		int rnt	= host_system(buf2);
+		fio_printf(1, "\r\nfinish with exit code %d.\r\n", rnt);
+     }
+}
+
 int main()
 {
 	init_rs232();
@@ -126,6 +150,11 @@ int main()
 	/* Create a task to output text read from romfs. */
 	xTaskCreate(command_prompt,
 	            (signed portCHAR *) "Command Prompt",
+	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
+
+	/* Create a task to output text read from romfs. */
+	xTaskCreate(sysinfo,
+	            (signed portCHAR *) "System Info",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
 	/* Start running the tasks. */
