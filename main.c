@@ -112,10 +112,9 @@ void sysinfo(void * pvParameters){
 	signed char buf[500];
 	char buf2[512] = "echo ";
 	size_t i, ii = 0;
-
     for( ;; vTaskDelayUntil( &xLastWakeTime, xFrequency ) ){
 		vTaskList(buf);
-		for(i = 5, ii = 0 ; i < 512 && ii < 500; i++)
+		for(i = 5, ii = 0 ; i < 512 && ii < 500 && buf[ii] != '\0'; i++)
 			if(buf[ii] == '\r' || buf[ii] == '\n'){
 				buf2[i++] = buf2[i++] = '\\';
 				buf2[i] = 'n';
@@ -125,6 +124,7 @@ void sysinfo(void * pvParameters){
 				buf2[i] = 't';
 				ii++;
 			}else buf2[i] = buf[ii++];
+		strcpy(buf2+i," >> sysinfo");
 		int return_code	= host_system(buf2);
      }
 }

@@ -4,3 +4,4 @@ main.list
 *.o
 mkromfs
 test-romfs.bin
+sysinfo
