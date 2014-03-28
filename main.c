@@ -109,12 +109,13 @@ void command_prompt(void *pvParameters)
 void sysinfo(void * pvParameters){
 	portTickType xLastWakeTime= xTaskGetTickCount();// Initialise the xLastWakeTime variable with the current time.
 	const portTickType xFrequency = 100;
+	signed char buf[500];
+	char buf2[512] = "echo ";
+	size_t i, ii = 0;
+
     for( ;; vTaskDelayUntil( &xLastWakeTime, xFrequency ) ){
-		signed char buf[500];
-		char buf2[512] = "echo ";
-		size_t i, ii = 0;
 		vTaskList(buf);
-		for(i = 5 ; i < 512 && ii < 500; i++)
+		for(i = 5, ii = 0 ; i < 512 && ii < 500; i++)
 			if(buf[ii] == '\r' || buf[ii] == '\n'){
 				buf2[i++] = buf2[i++] = '\\';
 				buf2[i] = 'n';
@@ -124,8 +125,7 @@ void sysinfo(void * pvParameters){
 				buf2[i] = 't';
 				ii++;
 			}else buf2[i] = buf[ii++];
-		int rnt	= host_system(buf2);
-		fio_printf(1, "\r\nfinish with exit code %d.\r\n", rnt);
+		int return_code	= host_system(buf2);
      }
 }
 
@@ -152,7 +152,7 @@ int main()
 	            (signed portCHAR *) "Command Prompt",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-	/* Create a task to output text read from romfs. */
+	/* Create a task to output print system info on regular interval. */
 	xTaskCreate(sysinfo,
 	            (signed portCHAR *) "System Info",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
