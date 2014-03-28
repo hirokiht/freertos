@@ -120,7 +120,7 @@ void sysinfo(void * pvParameters){
 		vTaskList(buf);
 		host_call(SYS_WRITE, (param []){{.pdInt=fd},{.pdChrPtr=(char *)buf}, {.pdInt=strlen((char *)buf)}});
      }
-     host_call(SYS_CLOSE, (param []){{.pdInt=fd}});
+     host_call(SYS_CLOSE, &fd);
 }
 
 int main()
