@@ -138,14 +138,11 @@ char *utoa(const char *numbox, unsigned int num, unsigned int base){
 
 int atoi(const char * str){
 	for( ; *str == ' ' || *str == '\t' || *str == '\n' || *str == '\v' || *str == '\f' || *str == '\r' ; str++);
-	int val = 0, sign = 1;
-	if(*str == '-'){
+	int val = 0;
+	if(*str == '-')
 		for( str++ ; *str >= '0' && *str <= '9' ; str++)
 			val = val*10 - *str + '0';
-		return val;
-	}else if(*str == '+')
-		str++;
-	for( ; *str >= '0' && *str <= '9' ; str++)
+	else for(*str == '+'? str++ : str ; *str >= '0' && *str <= '9' ; str++)
 			val = val*10 + *str - '0';
 	return val;
 }
