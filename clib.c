@@ -135,3 +135,17 @@ char *utoa(const char *numbox, unsigned int num, unsigned int base){
 		buf[i] = numbox [num % base];
 	return buf+i+1;
 }
+
+int atoi(const char * str){
+	for( ; *str == ' ' || *str == '\t' || *str == '\n' || *str == '\v' || *str == '\f' || *str == '\r' ; str++);
+	int val = 0, sign = 1;
+	if(*str == '-'){
+		for( str++ ; *str >= '0' && *str <= '9' ; str++)
+			val = val*10 - *str + '0';
+		return val;
+	}else if(*str == '+')
+		str++;
+	for( ; *str >= '0' && *str <= '9' ; str++)
+			val = val*10 + *str - '0';
+	return val;
+}

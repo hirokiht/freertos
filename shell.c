@@ -23,6 +23,7 @@ void host_command(int, char **);
 void help_command(int, char **);
 void host_command(int, char **);
 void mmtest_command(int, char **);
+void dumpsys_command(int, char **);
 
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
 
@@ -33,6 +34,7 @@ cmdlist cl[]={
 	MKCL(ps, "Report a snapshot of the current processes"),
 	MKCL(host, "Run command on host"),
 	MKCL(mmtest, "heap memory allocation test"),
+	MKCL(dumpsys, "Dump Specific Task Information to sysinfo file"),
 	MKCL(help, "help")
 };
 
@@ -120,6 +122,29 @@ void host_command(int n, char *argv[]){
 		fio_printf(1, "\r\nfinish with exit code %d.\r\n", rnt);
 	}else
 		fio_printf(2, "\r\nUsage: host 'command'\r\n");
+}
+
+void dumpsys_command(int argc, char *argv[]){
+	if(argc != 2 || (!atoi(argv[1]) && *argv[1] != '0')){
+		fio_printf(2, "\r\nKindly enter the task control block number desired as argument.\r\n");
+		return;
+	}
+	int arg = atoi(argv[1]);
+	fio_printf(2,"\r\nDumping system Task Control Block %d...\r\n",arg);
+	tskTCB * tcb = pvFindTaskByTCBNumber(arg);
+	if(!tcb)
+		fio_printf(2,"\r\nNo task found!\r\n");
+	else{
+		int fd = host_call(SYS_OPEN, (param []){{.pdChrPtr="sysinfo"}, {.pdInt=SYS_OPEN_A}, {.pdInt=7}});
+		if(!fd || fd == -1){
+			fio_printf(2, "\r\nOpen sysinfo file failure!\r\n");
+			return;	//open file failure
+		}else fio_printf(1,"\r\n");
+		char buf[256] = {'\0'};
+		sprintf(buf,"\nTCBNumber: %u\nPriority: %u\nName: %s\nStack address: 0x%X\nBase Priority: %u\nGenericListItemValue: %u\nEventListItemValue: %u\n",tcb->uxTCBNumber,tcb->uxPriority,tcb->pcTaskName,tcb->pxStack,tcb->uxBasePriority,tcb->xGenericListItem.xItemValue,tcb->xEventListItem.xItemValue);
+		host_call(SYS_WRITE, (param []){{.pdInt=fd},{.pdChrPtr=buf}, {.pdInt=strlen(buf)}});
+    	host_call(SYS_CLOSE, &fd);
+    }
 }
 
 void help_command(int n,char *argv[]){
